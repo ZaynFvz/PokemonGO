@@ -17,13 +17,13 @@ func crearPokemon(xnombre: String, ximagenNombre: String){
 }
 
 func agregarPokemons(){
-    crearPokemon(xnombre: "Mew", ximagenNombre: "mew")
+    crearPokemon(xnombre: "Charmander", ximagenNombre: "charmander")
     crearPokemon(xnombre: "Meowth", ximagenNombre: "meowth")
     crearPokemon(xnombre: "Abra", ximagenNombre: "abra")
     crearPokemon(xnombre: "Ballbasaur", ximagenNombre: "bullbasaur")
     crearPokemon(xnombre: "Pidgey", ximagenNombre: "pidgey")
     crearPokemon(xnombre: "Eevee", ximagenNombre: "eevee")
-    crearPokemon(xnombre: "Mankey", ximagenNombre: "mankey")
+    crearPokemon(xnombre: "Caterpie", ximagenNombre: "caterpie")
     crearPokemon(xnombre: "Pikachu", ximagenNombre: "pikachu-2")
     crearPokemon(xnombre: "Psyduck", ximagenNombre: "psyduck")
     crearPokemon(xnombre: "Rattata", ximagenNombre: "rattata")
@@ -31,7 +31,7 @@ func agregarPokemons(){
     crearPokemon(xnombre: "Squirtle", ximagenNombre: "squirtle")
     crearPokemon(xnombre: "Venonat", ximagenNombre: "venonat")
     crearPokemon(xnombre: "Weedle", ximagenNombre: "weedle")
-    crearPokemon(xnombre: "Zubat", ximagenNombre: "zubat")
+    crearPokemon(xnombre: "Bellsprout", ximagenNombre: "bellsprout")
     (UIApplication.shared.delegate as! AppDelegate).saveContext()
 }
 
@@ -69,3 +69,18 @@ func obtenerPokemonsNoAtrapados()-> [Pokemon]{
     }catch{}
     return []
 }
+
+/*func resetCoreData() {
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Pokemon")
+    let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+    
+    do {
+        try context.execute(batchDeleteRequest)
+        try context.save()
+    } catch {
+        print("Error al restablecer Core Data: \(error)")
+    }
+}*/
+
+

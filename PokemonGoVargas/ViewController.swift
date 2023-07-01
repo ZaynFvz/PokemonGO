@@ -27,6 +27,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         }else{
             ubicacion.requestWhenInUseAuthorization()
         }
+        
+        //resetCoreData()
+
     }
     
     @IBAction func centrarTapped(_ sender: Any) {
@@ -70,37 +73,72 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: true)
-        if view.annotation is MKUserLocation{
+        
+        if view.annotation is MKUserLocation {
             return
         }
+        
         let region = MKCoordinateRegion.init(center: (view.annotation?.coordinate)!, latitudinalMeters: 200, longitudinalMeters: 200)
         mapView.setRegion(region, animated: true)
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: false){(Timer) in
-            if let coord = self.ubicacion.location?.coordinate{
-                let pokemon = (view.annotation as! PokePin).pokemon
-                if mapView.visibleMapRect.contains(MKMapPoint(coord)){
-                    print("Puede atrapar el pokemon")
-                    pokemon.atrapado = true
-                    (UIApplication.shared.delegate as! AppDelegate).saveContext()
-                    mapView.removeAnnotation(view.annotation!)
-                    //mensaje de pokemon atrapado
-                    let alertaVC = UIAlertController(title: "FELICIDADES!!", message: "Atrapaste a \(pokemon.nombre!)", preferredStyle: .alert)
-                    let pokedexAccion = UIAlertAction(title: "Ver Pokedex", style: .default, handler: {(action) in self.performSegue(withIdentifier: "pokedexSegue", sender: nil)
-                    })
-                    alertaVC.addAction(pokedexAccion)
-                    let okAccion = UIAlertAction(title: "OK", style: .default, handler: nil)
-                    alertaVC.addAction(okAccion)
+        
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] (_) in
+            guard let self = self, let coord = self.ubicacion.location?.coordinate else {
+                return
+            }
+            
+            let pokemon = (view.annotation as! PokePin).pokemon
+            
+            if mapView.visibleMapRect.contains(MKMapPoint(coord)) {
+                if pokemon.atrapado {
+                    let alertaVC = UIAlertController(title: "¡Atención!", message: "Ya tienes un \(pokemon.nombre!). ¿Aún así deseas capturarlo?", preferredStyle: .alert)
+                    
+                    let capturarAccion = UIAlertAction(title: "Sí", style: .default) { (_) in
+                        self.realizarCaptura(pokemon, annotationView: view)
+                    }
+                    
+                    let cancelarAccion = UIAlertAction(title: "No", style: .cancel, handler: nil)
+                    
+                    alertaVC.addAction(capturarAccion)
+                    alertaVC.addAction(cancelarAccion)
+                    
                     self.present(alertaVC, animated: true, completion: nil)
-                }else{
-                    print("No se puede atrapar el pokemon")
-                    let alertaVC = UIAlertController(title: "Upss. Estas muy lejos", message: "No puedes atrapar a \(pokemon.nombre!). Acerquese mas.", preferredStyle: .alert)
-                    let okAccion = UIAlertAction(title: "OK", style: .default, handler: nil)
-                    alertaVC.addAction(okAccion)
-                    self.present(alertaVC, animated: true, completion: nil)
+                } else {
+                    self.realizarCaptura(pokemon, annotationView: view)
                 }
+            } else {
+                // Pokémon demasiado lejos
+                let alertaVC = UIAlertController(title: "¡Ups!", message: "Estás muy lejos para atrapar a \(pokemon.nombre!). Acércate más.", preferredStyle: .alert)
+                let okAccion = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertaVC.addAction(okAccion)
+                self.present(alertaVC, animated: true, completion: nil)
             }
         }
     }
+
+    private func realizarCaptura(_ pokemon: Pokemon, annotationView: MKAnnotationView) {
+        // Realizar la captura del Pokémon
+        pokemon.atrapado = true
+        pokemon.contador += 1
+        
+        (UIApplication.shared.delegate as! AppDelegate).saveContext()
+        
+        mapView.removeAnnotation(annotationView.annotation!)
+        
+        // Mostrar mensaje de Pokémon atrapado
+        let alertaVC = UIAlertController(title: "¡Felicidades!", message: "¡Atrapaste a \(pokemon.nombre!)!", preferredStyle: .alert)
+        
+        let pokedexAccion = UIAlertAction(title: "Ver Pokédex", style: .default) { (_) in
+            self.performSegue(withIdentifier: "pokedexSegue", sender: nil)
+        }
+        
+        let okAccion = UIAlertAction(title: "OK", style: .default, handler: nil)
+        
+        alertaVC.addAction(pokedexAccion)
+        alertaVC.addAction(okAccion)
+        
+        present(alertaVC, animated: true, completion: nil)
+    }
+
     
     func setup(){
         mapView.delegate = self
@@ -124,6 +162,5 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             setup()
         }
     }
-
 }
 
